@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobScout</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+            max-width: 860px;
+            margin: 48px auto;
+            padding: 0 24px;
+            color: #1a1a1a;
+            background: #fff;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0 0 28px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 15px;
+            border: 1px solid #aaa;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: #555;
+        }
+
+        .search-bar button {
+            padding: 8px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #1a1a1a;
+        }
+
+        .search-bar button:hover {
+            background: #333;
+        }
+
+        #status {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .job {
+            border-top: 1px solid #ddd;
+            padding: 16px 0;
+        }
+
+        .job:last-child {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .job-title a {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+
+        .job-title a:hover {
+            text-decoration: underline;
+        }
+
+        .job-meta {
+            font-size: 14px;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        .job-salary {
+            font-size: 14px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>JobScout</h1>
+
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="e.g. developer" value="developer">
+        <button id="search-btn">Search</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script>
+        const input = document.getElementById('search-input');
+        const btn = document.getElementById('search-btn');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+
+        async function search() {
+            const q = input.value.trim();
+            if (!q) return;
+
+            status.textContent = 'Searching...';
+            results.innerHTML = '';
+
+            try {
+                const res = await fetch(`/api/jobs?q=${encodeURIComponent(q)}`);
+                const jobs = await res.json();
+
+                if (jobs.length === 0) {
+                    status.textContent = 'No jobs found.';
+                    return;
+                }
+
+                status.textContent = `${jobs.length} results`;
+
+                jobs.forEach(job => {
+                    const div = document.createElement('div');
+                    div.className = 'job';
+                    div.innerHTML = `
+                        <div class="job-title"><a href="${job.url}" target="_blank">${job.title}</a></div>
+                        <div class="job-meta">${job.company} &mdash; ${job.location}</div>
+                        ${job.salary ? `<div class="job-salary">${job.salary}</div>` : ''}
+                    `;
+                    results.appendChild(div);
+                });
+
+            } catch (err) {
+                status.textContent = 'Something went wrong.';
+                console.error(err);
+            }
+        }
+
+        btn.addEventListener('click', search);
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') search();
+        });
+    </script>
+
+</body>
+</html>
