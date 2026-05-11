@@ -8,5 +8,5 @@ export interface Job {
     salary?: string;
     employmentType?: string;
     postedAt: Date;
-    source: 'karriere' | 'ams' | 'stepstone' | 'Devjobs' | 'Indeed';
+    source: 'karriere' | 'devjobs' | 'linkedin' | 'ams';
 }
