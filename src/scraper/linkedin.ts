@@ -44,23 +44,26 @@ export function parseLinkedinJob(raw: LinkedinRawJob): Job {
     };
 }
 
-export async function scrapeLinkedin(searchTerm: string = 'software engineer'): Promise<Job[]> {
-    console.log(`Scraping LinkedIn for "${searchTerm}"...`);
+export async function scrapeLinkedin(searchTerm: string = 'software engineer', location?: string): Promise<Job[]> {
+    console.log(`Scraping LinkedIn for "${searchTerm}"${location ? ` in "${location}"` : ''}...`);
 
-    const url = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(searchTerm)}&location=Austria&start=0`;
+    const locationParam = location ? `${encodeURIComponent(location)},+Österreich` : 'Austria';
+    const baseUrl = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(searchTerm)}&location=${locationParam}`;
 
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
 
     try {
-        const html = await fetchHtml(url);
+        // fetch 3 pages in parallel (25 results each)
+        const pages = await Promise.all([0, 25, 50].map(start => fetchHtml(`${baseUrl}&start=${start}`)));
+        const html = pages.filter(p => p && p.length > 100).join('\n');
 
-        if (!html || html.length < 100) {
+        if (!html) {
             console.log('LinkedIn: empty or blocked response');
             return [];
         }
 
-        await page.setContent(html, { waitUntil: 'domcontentloaded' });
+        await page.setContent(`<ul>${html}</ul>`, { waitUntil: 'domcontentloaded' });
 
         const jobs = await page.evaluate((): Array<{
             id: string;

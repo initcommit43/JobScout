@@ -5,41 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JobScout</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: sans-serif;
-            max-width: 860px;
+            max-width: 900px;
             margin: 48px auto;
             padding: 0 24px;
             color: #1a1a1a;
             background: #fff;
         }
 
-        h1 {
-            font-size: 24px;
-            margin: 0 0 28px;
-        }
+        h1 { font-size: 24px; margin: 0 0 24px; }
 
+        /* search bar */
         .search-bar {
             display: flex;
             gap: 8px;
-            margin-bottom: 28px;
+            margin-bottom: 16px;
         }
 
-        .search-bar input {
-            flex: 1;
+        .search-wrapper { flex: 1; position: relative; }
+
+        .search-bar input[type="text"] {
+            width: 100%;
             padding: 8px 10px;
             font-size: 15px;
             border: 1px solid #aaa;
             outline: none;
         }
 
-        .search-bar input:focus {
-            border-color: #555;
-        }
+        .search-bar input[type="text"]:focus { border-color: #555; }
 
         .search-bar button {
             padding: 8px 18px;
@@ -48,26 +44,78 @@
             background: #1a1a1a;
             color: #fff;
             border: 1px solid #1a1a1a;
+            white-space: nowrap;
         }
 
-        .search-bar button:hover {
-            background: #333;
+        .search-bar button:hover { background: #333; }
+
+        /* autocomplete */
+        #suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid #aaa;
+            border-top: none;
+            background: #fff;
+            z-index: 10;
+            display: none;
         }
 
-        #status {
+        .suggestion {
+            padding: 8px 10px;
             font-size: 14px;
+            cursor: pointer;
+        }
+
+        .suggestion:hover, .suggestion.active { background: #f0f0f0; }
+
+        /* filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            padding: 14px;
+            background: #f7f7f7;
+            border: 1px solid #e0e0e0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             color: #666;
-            margin-bottom: 16px;
         }
 
-        .job {
-            border-top: 1px solid #ddd;
-            padding: 16px 0;
+        .filter-group select,
+        .filter-group input[type="text"],
+        .filter-group input[type="number"] {
+            padding: 6px 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            background: #fff;
+            outline: none;
+            width: 100%;
         }
 
-        .job:last-child {
-            border-bottom: 1px solid #ddd;
-        }
+        .filter-group select:focus,
+        .filter-group input:focus { border-color: #555; }
+
+        /* status + results */
+        #status { font-size: 14px; color: #666; margin-bottom: 16px; }
+
+        .job { border-top: 1px solid #ddd; padding: 16px 0; }
+        .job:last-child { border-bottom: 1px solid #ddd; }
 
         .job-title a {
             font-size: 17px;
@@ -76,80 +124,220 @@
             text-decoration: none;
         }
 
-        .job-title a:hover {
-            text-decoration: underline;
+        .job-title a:hover { text-decoration: underline; }
+
+        .job-meta { font-size: 14px; color: #555; margin-top: 4px; }
+
+        .job-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
         }
 
-        .job-meta {
-            font-size: 14px;
-            color: #555;
-            margin-top: 4px;
+        .tag {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            background: #f0f0f0;
+            color: #444;
         }
 
-        .job-salary {
-            font-size: 14px;
-            margin-top: 4px;
-        }
+        .tag.salary { background: #e8f5e9; color: #2e7d32; }
+        .tag.level  { background: #e3f2fd; color: #1565c0; }
+        .tag.model  { background: #fff3e0; color: #e65100; }
+        .tag.source { background: #f3e5f5; color: #6a1b9a; }
     </style>
 </head>
 <body>
 
-    <h1>JobScout</h1>
+<h1>JobScout</h1>
 
-    <div class="search-bar">
-        <input type="text" id="search-input" placeholder="e.g. developer" value="developer">
-        <button id="search-btn">Search</button>
+<div class="search-bar">
+    <div class="search-wrapper">
+        <input type="text" id="search-input" placeholder="e.g. Software Engineer" autocomplete="off">
+        <div id="suggestions"></div>
     </div>
+    <button id="search-btn">Search</button>
+</div>
 
-    <div id="status"></div>
-    <div id="results"></div>
+<div class="filters">
+    <div class="filter-group">
+        <label>Location</label>
+        <input type="text" id="f-location" placeholder="e.g. Wien">
+    </div>
+    <div class="filter-group">
+        <label>Min. Salary (€ / year)</label>
+        <input type="number" id="f-salary" placeholder="e.g. 50000" step="5000">
+    </div>
+    <div class="filter-group">
+        <label>Level</label>
+        <select id="f-level">
+            <option value="">All levels</option>
+            <option>Junior</option>
+            <option>Mid-Level</option>
+            <option>Senior</option>
+            <option>Lead</option>
+            <option>Expert</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Employment model</label>
+        <select id="f-model">
+            <option value="">All models</option>
+            <option>Vollzeit</option>
+            <option>Teilzeit</option>
+            <option>Hybrid</option>
+            <option>Remote</option>
+            <option>Freelance</option>
+            <option>Praktikum</option>
+        </select>
+    </div>
+</div>
 
-    <script>
-        const input = document.getElementById('search-input');
-        const btn = document.getElementById('search-btn');
-        const status = document.getElementById('status');
-        const results = document.getElementById('results');
+<div id="status"></div>
+<div id="results"></div>
 
-        async function search() {
-            const q = input.value.trim();
-            if (!q) return;
+<script>
+    const input       = document.getElementById('search-input');
+    const btn         = document.getElementById('search-btn');
+    const status      = document.getElementById('status');
+    const results     = document.getElementById('results');
+    const suggestBox  = document.getElementById('suggestions');
+    const fLocation   = document.getElementById('f-location');
+    const fSalary     = document.getElementById('f-salary');
+    const fLevel      = document.getElementById('f-level');
+    const fModel      = document.getElementById('f-model');
 
-            status.textContent = 'Searching...';
-            results.innerHTML = '';
+    let allJobs = [];
+    let activeIndex = -1;
+    let currentSuggestions = [];
+    let debounceTimer = null;
 
-            try {
-                const res = await fetch(`/api/jobs?q=${encodeURIComponent(q)}`);
-                const jobs = await res.json();
-
-                if (jobs.length === 0) {
-                    status.textContent = 'No jobs found.';
-                    return;
-                }
-
-                status.textContent = `${jobs.length} results`;
-
-                jobs.forEach(job => {
-                    const div = document.createElement('div');
-                    div.className = 'job';
-                    div.innerHTML = `
-                        <div class="job-title"><a href="${job.url}" target="_blank">${job.title}</a></div>
-                        <div class="job-meta">${job.company} &mdash; ${job.location}</div>
-                        ${job.salary ? `<div class="job-salary">${job.salary}</div>` : ''}
-                    `;
-                    results.appendChild(div);
-                });
-
-            } catch (err) {
-                status.textContent = 'Something went wrong.';
-                console.error(err);
-            }
-        }
-
-        btn.addEventListener('click', search);
-        input.addEventListener('keydown', e => {
-            if (e.key === 'Enter') search();
+    // ── autocomplete ──────────────────────────────────────────────
+    function showSuggestions(items) {
+        currentSuggestions = items;
+        activeIndex = -1;
+        suggestBox.innerHTML = '';
+        if (!items.length) { suggestBox.style.display = 'none'; return; }
+        items.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'suggestion';
+            div.textContent = item;
+            div.addEventListener('mousedown', () => selectSuggestion(item));
+            suggestBox.appendChild(div);
         });
-    </script>
+        suggestBox.style.display = 'block';
+    }
+
+    function selectSuggestion(value) {
+        input.value = value;
+        suggestBox.style.display = 'none';
+        doSearch();
+    }
+
+    input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const q = input.value.trim();
+        if (!q) { suggestBox.style.display = 'none'; return; }
+        debounceTimer = setTimeout(async () => {
+            const res = await fetch(`/api/suggestions?q=${encodeURIComponent(q)}`);
+            showSuggestions(await res.json());
+        }, 180);
+    });
+
+    input.addEventListener('keydown', e => {
+        const items = suggestBox.querySelectorAll('.suggestion');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = Math.max(activeIndex - 1, -1);
+            items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+        } else if (e.key === 'Enter') {
+            if (activeIndex >= 0 && items[activeIndex]) selectSuggestion(currentSuggestions[activeIndex]);
+            else { suggestBox.style.display = 'none'; doSearch(); }
+        } else if (e.key === 'Escape') {
+            suggestBox.style.display = 'none';
+        }
+    });
+
+    input.addEventListener('blur', () => suggestBox.style.display = 'none');
+
+    // ── filtering ─────────────────────────────────────────────────
+    function applyFilters() {
+        const salary = parseInt(fSalary.value) || 0;
+        const level  = fLevel.value.toLowerCase();
+        const model  = fModel.value.toLowerCase();
+
+        return allJobs.filter(job => {
+            if (salary && (job.salaryMin == null || job.salaryMin < salary)) return false;
+            if (level  && job.level?.toLowerCase() !== level) return false;
+            if (model  && job.employmentType?.toLowerCase() !== model) return false;
+            return true;
+        });
+    }
+
+    function renderJobs(jobs) {
+        results.innerHTML = '';
+        status.textContent = `${jobs.length} results`;
+
+        if (!jobs.length) { status.textContent = 'No jobs match the current filters.'; return; }
+
+        jobs.forEach(job => {
+            const div = document.createElement('div');
+            div.className = 'job';
+
+            const tags = [
+                job.salary       ? `<span class="tag salary">${job.salary}</span>` : '',
+                job.level        ? `<span class="tag level">${job.level}</span>` : '',
+                job.employmentType ? `<span class="tag model">${job.employmentType}</span>` : '',
+                `<span class="tag source">${job.source}</span>`,
+            ].join('');
+
+            div.innerHTML = `
+                <div class="job-title"><a href="${job.url}" target="_blank">${job.title}</a></div>
+                <div class="job-meta">${job.company} &mdash; ${job.location}</div>
+                <div class="job-tags">${tags}</div>
+            `;
+            results.appendChild(div);
+        });
+    }
+
+    // location triggers a new scrape; salary/level/model filter in-memory
+    [fSalary, fLevel, fModel].forEach(el =>
+        el.addEventListener('input', () => renderJobs(applyFilters()))
+    );
+
+    // ── search ────────────────────────────────────────────────────
+    async function doSearch() {
+        const q = input.value.trim();
+        if (!q) return;
+
+        status.textContent = 'Searching...';
+        results.innerHTML = '';
+        allJobs = [];
+
+        const location = fLocation.value.trim();
+        const params = new URLSearchParams({ q });
+        if (location) params.set('location', location);
+
+        try {
+            const res = await fetch(`/api/jobs?${params}`);
+            allJobs = await res.json();
+
+            if (!allJobs.length) { status.textContent = 'No jobs found.'; return; }
+            renderJobs(applyFilters());
+        } catch (err) {
+            status.textContent = 'Something went wrong.';
+            console.error(err);
+        }
+    }
+
+    btn.addEventListener('click', doSearch);
+</script>
 
 </body>
 </html>

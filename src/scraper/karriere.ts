@@ -1,5 +1,6 @@
 import { chromium } from 'playwright';
 import { Job } from '../types/Job';
+import { parseSalaryMin } from '../utils/salary';
 
 interface RawJobData {
     id: string;
@@ -48,20 +49,24 @@ export function parseRawJob(raw: RawJobData): Job {
         location: raw.location.trim(),
         url: raw.url,
         salary: raw.salary,
+        salaryMin: parseSalaryMin(raw.salary),
         postedAt: parseRelativeDate(raw.dateText),
         source: 'karriere',
     };
 }
 
 // selectors might break if karriere.at redesigns - verify against live DOM if jobs stop showing up
-export async function scrapeKarriere(searchTerm: string = 'developer'): Promise<Job[]> {
-    console.log(`Scraping karriere.at for "${searchTerm}"...`);
+export async function scrapeKarriere(searchTerm: string = 'developer', location?: string): Promise<Job[]> {
+    console.log(`Scraping karriere.at for "${searchTerm}"${location ? ` in "${location}"` : ''}...`);
 
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
 
     try {
-        const url = `https://www.karriere.at/jobs/${encodeURIComponent(searchTerm)}`;
+        const locationSlug = location
+            ? '/' + location.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+            : '';
+        const url = `https://www.karriere.at/jobs/${encodeURIComponent(searchTerm)}${locationSlug}`;
         await page.goto(url, { waitUntil: 'networkidle' });
         await page.waitForSelector('li.m-jobsList__item[data-gtm-item-type="job"]', { timeout: 15000 });
 
