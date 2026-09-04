@@ -1,0 +1,7 @@
+{
+  "karriere.at": [{ "keyword": "junior entwickler" }],
+  "jobs.at": [{ "keyword": "java entwickler" }],
+  "ams": [{ "keyword": "junior software developer", "location": "Linz", "vicinity": "40" }],
+  "devjobs.at": [{ "params": "jobLevel=junior-job-level" }],
+  "linkedin": [{ "keyword": "junior software developer", "location": "Oberösterreich, Österreich" }]
+}
