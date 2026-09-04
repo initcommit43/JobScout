@@ -1,0 +1,69 @@
+#!/bin/sh
+# Blockt Commits, die Geheimnisse oder private Daten in den Index bringen.
+# Aktivieren:  git config core.hooksPath .githooks
+#
+# Ein Hook, der einmal greift, ist mehr wert als jeder Vorsatz. Wird er ausgeloest,
+# ist der Commit falsch, nicht der Hook — nicht mit --no-verify umgehen.
+
+set -eu
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+fehler=0
+melde() {
+  echo "pre-commit: $1" >&2
+  fehler=1
+}
+
+for datei in $staged; do
+  # 1) Was ignoriert ist, kann nur ueber "git add -f" hier gelandet sein — also
+  # gegen die eigene Ignore-Liste. Das deckt .env, data/ und jede rein lokale
+  # Arbeitsdatei ab, ohne dass der Hook sie einzeln aufzaehlen (und damit
+  # veroeffentlichen) muesste.
+  if git check-ignore -q -- "$datei"; then
+    melde "$datei ist als ignoriert gefuehrt und gehoert nicht in den Index"
+    continue
+  fi
+
+  # 2) Die teuren Faelle zusaetzlich beim Namen, falls die Ignore-Liste je verrutscht.
+  case "$datei" in
+    .env|.env.*)
+      [ "$datei" = ".env.example" ] || melde "$datei enthaelt Zugangsdaten"
+      ;;
+    data/*)
+      melde "$datei liegt unter data/ — dort stehen private Bewerbungsdaten"
+      ;;
+    plan.md|CLAUDE.md|AGENTS.md|MEMORY.md|memory/*|.claude/*|.cursor/*)
+      melde "$datei ist eine lokale Arbeitsdatei und bleibt ausserhalb des Repos"
+      ;;
+    config/*.json)
+      case "$datei" in
+        *.example.json) ;;
+        *) melde "$datei ist eine echte Konfiguration — committet wird nur config/*.example.json" ;;
+      esac
+      ;;
+  esac
+done
+
+# 3) Inhalte, die nach einem Schluessel aussehen. Nur der Zuwachs wird geprueft.
+zuwachs=$(git diff --cached --unified=0 --diff-filter=ACMR -- . ':(exclude).githooks/pre-commit' | grep '^+' | grep -v '^+++' || true)
+
+if [ -n "$zuwachs" ]; then
+  muster='sk-[A-Za-z0-9_-]\{16,\}\|AIza[A-Za-z0-9_-]\{30,\}\|ghp_[A-Za-z0-9]\{30,\}\|xox[abprs]-[A-Za-z0-9-]\{10,\}\|-----BEGIN [A-Z ]*PRIVATE KEY-----'
+  if echo "$zuwachs" | grep -q "$muster"; then
+    melde "der Zuwachs sieht nach einem API-Schluessel oder privaten Schluessel aus"
+  fi
+
+  # Zuweisung an eine Schluessel-Variable mit nicht-leerem Wert.
+  if echo "$zuwachs" | grep -qE '(API_KEY|APP_PASSWORD|SECRET|TOKEN|PASSWORD)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9_/+-]{12,}'; then
+    melde "der Zuwachs weist einer Schluessel-Variablen einen Wert zu — Schluessel gehoeren in .env"
+  fi
+fi
+
+if [ "$fehler" -ne 0 ]; then
+  echo "pre-commit: Commit abgebrochen. Betroffenes aus dem Index nehmen (git restore --staged <datei>)." >&2
+  exit 1
+fi
+
+exit 0
