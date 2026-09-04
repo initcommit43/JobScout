@@ -9,6 +9,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "scrape": "node --import tsx --env-file-if-exists=.env scripts/scrape.ts",
     "test": "node --import tsx --test --test-reporter spec \"test/**/*.test.ts\"",
     "test:watch": "node --import tsx --test --watch --test-reporter spec \"test/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
