@@ -21,7 +21,12 @@ export interface ScrapedJob {
   url: string;
   title: string;
   company: string;
-  location?: string;
+  /**
+   * Explicitly allows undefined despite exactOptionalPropertyTypes: not every portal
+   * states a location, and an adapter should be able to say "unknown" rather than having
+   * to omit the key conditionally at every construction site.
+   */
+  location?: string | undefined;
   description: string;
   postedAt?: string | null;
   salary?: string | null;

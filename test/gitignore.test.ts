@@ -60,9 +60,11 @@ test('kein arbeitsdokument ist verfolgt', () => {
 });
 
 test('kein quelltext enthaelt eine fremde e-mail-adresse', () => {
+  // .html gehoert ausdruecklich dazu: die Scraper-Fixtures sind mitgeschnittene echte
+  // Stellenanzeigen und brachten Kontaktadressen samt einem Sentry-Token mit.
   const verfolgt = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
     .split('\n')
-    .filter((datei) => /\.(ts|tsx|js|json|md|yml|yaml)$/.test(datei));
+    .filter((datei) => /\.(ts|tsx|js|json|md|yml|yaml|html|htm|txt|csv)$/.test(datei));
 
   const adresse = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
   const erlaubt = /@(example\.com|example\.org|firmenabc\.at)$/;
