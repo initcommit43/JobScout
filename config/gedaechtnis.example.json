@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "person": {
+    "name": "Max Mustermann",
+    "email": "bewerber@example.com",
+    "telefon": "+43 000 0000000",
+    "ort": "Wien",
+    "links": {
+      "github": "https://github.com/mustermann",
+      "linkedin": "https://www.linkedin.com/in/mustermann"
+    }
+  },
+  "ausbildung": [
+    {
+      "id": "ausb-1",
+      "institution": "HTL Musterstadt",
+      "abschluss": "Matura",
+      "fachrichtung": "Informatik",
+      "von": "2015-09",
+      "bis": "2020-06",
+      "herkunft": { "methode": "manuell", "bestaetigtAm": "2026-01-15T10:00:00.000Z" }
+    }
+  ],
+  "berufserfahrung": [
+    {
+      "id": "erf-1",
+      "firma": "Beispiel GmbH",
+      "position": "Softwareentwickler",
+      "von": "2020-09",
+      "bis": null,
+      "taetigkeiten": [
+        "Wartung und Ausbau einer Bestellplattform",
+        "Ablösung eines Altsystems in Etappen"
+      ],
+      "technologien": ["TypeScript", "Node.js", "PostgreSQL"],
+      "herkunft": { "methode": "manuell", "bestaetigtAm": "2026-01-15T10:00:00.000Z" }
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-1",
+      "name": "TypeScript",
+      "kategorie": "sprache",
+      "niveau": "sicher",
+      "belegIds": ["erf-1"],
+      "herkunft": { "methode": "manuell", "bestaetigtAm": "2026-01-15T10:00:00.000Z" }
+    },
+    {
+      "id": "skill-2",
+      "name": "PostgreSQL",
+      "kategorie": "datenbank",
+      "niveau": "fortgeschritten",
+      "belegIds": ["erf-1"],
+      "herkunft": { "methode": "manuell", "bestaetigtAm": "2026-01-15T10:00:00.000Z" }
+    }
+  ],
+  "zertifikate": [],
+  "projekte": [
+    {
+      "id": "proj-1",
+      "name": "Bestellplattform",
+      "beschreibung": "Ablösung eines Altsystems bei laufendem Betrieb, in Etappen ausgeliefert.",
+      "technologien": ["TypeScript", "PostgreSQL"],
+      "rolle": "Entwickler",
+      "anchor": true,
+      "herkunft": { "methode": "manuell", "bestaetigtAm": "2026-01-15T10:00:00.000Z" }
+    }
+  ],
+  "sprachkenntnisse": [
+    { "sprache": "Deutsch", "niveau": "Muttersprache" },
+    { "sprache": "Englisch", "niveau": "B2" }
+  ],
+  "praeferenzen": {
+    "wunschpositionen": ["Softwareentwickler", "Backend-Entwickler"],
+    "orte": ["Wien", "Remote"],
+    "gehaltMinimum": 45000,
+    "arbeitsmodell": "hybrid"
+  },
+  "schreibstil": {
+    "tonfall": "sachlich",
+    "beispielAnschreiben": null,
+    "verbotswoerter": ["motiviert", "begeistert", "entzückt", "leidenschaftlich"],
+    "maxWoerter": 180,
+    "absaetze": 3
+  },
+  "dokumente": []
+}
