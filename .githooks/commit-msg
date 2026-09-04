@@ -1,0 +1,46 @@
+#!/bin/sh
+# Haelt fremde Signaturen und private Identitaeten aus der Commit-Historie.
+#
+# Wessen Name in der Historie eines Portfolio-Repos steht, entscheidet der Autor.
+# Ein Abbinder, den irgendein Werkzeug per Voreinstellung anhaengt, gehoert nicht dazu —
+# und faellt erst auf, wenn er schon oeffentlich ist. Deshalb mechanisch statt per Vorsatz.
+#
+# Bewusst ohne Namensliste: geprueft wird die FORM eines Abbinders, nicht der Anbieter.
+# Eine Namensliste veraltet und nennt im Repo genau das, was dort nicht stehen soll.
+
+set -eu
+
+nachricht=$(grep -v '^#' "$1" || true)
+fehler=0
+
+melde() {
+  echo "commit-msg: $1" >&2
+  fehler=1
+}
+
+# Mitautoren-Abbinder jeder Art.
+if echo "$nachricht" | grep -qiE '^[[:space:]]*co-authored-by:'; then
+  melde 'Co-Authored-By gehoert nicht in dieses Repo'
+fi
+
+# "Generated with …", Sitzungs-Abbinder und Bot-Signaturen.
+if echo "$nachricht" | grep -qiE '^[[:space:]]*(generated (with|by)|.*-session:)|🤖'; then
+  melde 'Werkzeug- oder Sitzungs-Abbinder in der Nachricht'
+fi
+
+# noreply-Adressen sind Bot-Absender und haben in einer Nachricht nichts zu suchen.
+if echo "$nachricht" | grep -qiE 'no-?reply@'; then
+  melde 'noreply-Adresse in der Nachricht'
+fi
+
+# Private Mailanbieter — der Autor steht im Autorfeld, nicht im Text.
+if echo "$nachricht" | grep -qE '[A-Za-z0-9._%+-]+@(gmail|gmx|web|outlook|hotmail|yahoo)\.[A-Za-z]{2,}'; then
+  melde 'private E-Mail-Adresse in der Nachricht'
+fi
+
+if [ "$fehler" -ne 0 ]; then
+  echo "commit-msg: Commit abgebrochen. Abbinder entfernen und erneut committen." >&2
+  exit 1
+fi
+
+exit 0
