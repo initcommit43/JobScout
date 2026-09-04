@@ -1,0 +1,82 @@
+{
+  "$kommentar": [
+    "Anbieter-Registry. Enthaelt ausschliesslich Basis-URL, den NAMEN der Umgebungsvariablen",
+    "und Faehigkeiten — niemals einen Schluessel. Der Schluessel steht in .env.",
+    "Diese Datei wird beim ersten Start nach config/anbieter.json kopiert; fehlt die Kopie,",
+    "wird sie direkt gelesen. Ein weiterer Anbieter ist eine Zeile hier, kein Code."
+  ],
+  "anbieter": {
+    "anthropic": {
+      "label": "Anthropic (Claude)",
+      "adapter": "anthropic",
+      "envVar": "ANTHROPIC_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 60000 }
+    },
+    "openai": {
+      "label": "OpenAI (ChatGPT)",
+      "adapter": "openai-compatible",
+      "baseURL": "https://api.openai.com/v1",
+      "envVar": "OPENAI_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 60000 }
+    },
+    "google": {
+      "label": "Google (Gemini)",
+      "adapter": "google",
+      "envVar": "GOOGLE_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 60000 }
+    },
+    "moonshot": {
+      "label": "Moonshot (Kimi)",
+      "adapter": "openai-compatible",
+      "baseURL": "https://api.moonshot.ai/v1",
+      "envVar": "MOONSHOT_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 40000 }
+    },
+    "dashscope": {
+      "label": "Alibaba (Qwen)",
+      "adapter": "openai-compatible",
+      "baseURL": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+      "envVar": "DASHSCOPE_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 40000 }
+    },
+    "zhipu": {
+      "label": "Zhipu (GLM)",
+      "adapter": "openai-compatible",
+      "baseURL": "https://open.bigmodel.cn/api/paas/v4",
+      "envVar": "ZHIPU_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 40000 }
+    },
+    "hunyuan": {
+      "label": "Tencent (Hunyuan)",
+      "adapter": "openai-compatible",
+      "baseURL": "https://api.hunyuan.cloud.tencent.com/v1",
+      "envVar": "HUNYUAN_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 30000 }
+    },
+    "deepseek": {
+      "label": "DeepSeek",
+      "adapter": "openai-compatible",
+      "baseURL": "https://api.deepseek.com/v1",
+      "envVar": "DEEPSEEK_API_KEY",
+      "faehigkeiten": { "vision": false, "jsonMode": true, "contextBudget": 40000 }
+    },
+    "openrouter": {
+      "label": "OpenRouter",
+      "adapter": "openai-compatible",
+      "baseURL": "https://openrouter.ai/api/v1",
+      "envVar": "OPENROUTER_API_KEY",
+      "faehigkeiten": { "vision": true, "jsonMode": true, "contextBudget": 40000 }
+    },
+    "ollama": {
+      "label": "Ollama (lokal)",
+      "adapter": "openai-compatible",
+      "baseURL": "http://localhost:11434/v1",
+      "faehigkeiten": {
+        "vision": false,
+        "jsonMode": true,
+        "contextBudget": 6000,
+        "retryTimeoutsMs": [600000, 900000]
+      }
+    }
+  }
+}
