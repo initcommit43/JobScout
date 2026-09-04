@@ -1,3 +1,36 @@
-node_modules
-dist
-.claude
+# --- Geheimnisse und private Daten: gilt vor allem anderen ---
+.env
+.env.*
+!.env.example
+data/
+
+# Konfiguration ist git-verfolgt, aber nur die Vorlagen
+config/*.json
+!config/*.example.json
+
+# --- Arbeitsdokumente und Agenten-Konfiguration: rein lokal ---
+plan.md
+CLAUDE.md
+AGENTS.md
+MEMORY.md
+memory/
+.claude/
+.cursor/
+.aider*
+
+# --- Build und Abhaengigkeiten ---
+node_modules/
+ui/dist/
+dist/
+*.tsbuildinfo
+
+# --- IDE und Betriebssystem ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- Sonstiges ---
+*.bak
+*.log
+coverage/
