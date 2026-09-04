@@ -9,6 +9,8 @@ export interface TestAnfrage {
 }
 
 export interface TestServer {
+  /** Origin without a path — for SDKs that append their own version segment. */
+  origin: string;
   baseURL: string;
   /** Every request the adapter sent, in order. */
   anfragen: TestAnfrage[];
@@ -48,8 +50,11 @@ export async function testServer(handler: Handler): Promise<TestServer> {
   await once(server, 'listening');
   const adresse = server.address() as AddressInfo;
 
+  const origin = `http://127.0.0.1:${String(adresse.port)}`;
+
   return {
-    baseURL: `http://127.0.0.1:${String(adresse.port)}/v1`,
+    origin,
+    baseURL: `${origin}/v1`,
     anfragen,
     async schliessen() {
       server.closeAllConnections();
