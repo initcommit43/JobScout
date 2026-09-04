@@ -1,0 +1,14 @@
+{
+  "$kommentar": [
+    "Vorlage fuer config/settings.json. Enthaelt Anbietername und Modell-ID — niemals einen",
+    "Schluessel. Modell-IDs sind bewusst freie Textfelder: sie veralten schneller als das Repo.",
+    "Die UI fuellt die Auswahlliste live ueber GET /api/anbieter/:name/modelle."
+  ],
+  "llm": {
+    "filter": { "anbieter": "dashscope", "model": "" },
+    "writer": { "anbieter": "anthropic", "model": "" },
+    "extract": { "anbieter": "anthropic", "model": "" }
+  },
+  "filterModus": "regex",
+  "sendMode": "entwurf"
+}
